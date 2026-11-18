@@ -15,6 +15,8 @@ This work is licensed under a Creative Commons Attribution-NonCommercial-NoDeriv
 
 ORCID: 0009-0002-0645-5180
 
+https://doi.org/10.5281/zenodo.24328241
+
 CHANGELOG v6.6.1 -> v6.7.0
 -------------------------
 EXTENSION RELEASE. The v6.5.1 homopolymer engine (VSSUFEngine) is

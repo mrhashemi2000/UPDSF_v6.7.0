@@ -1,3 +1,4 @@
+
 [![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.24328241-blue)](https://doi.org/10.5281/zenodo.24328241) [![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 
 [![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.24331292-blue)](https://doi.org/10.5281/zenodo.24331292) [![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
@@ -11,59 +12,68 @@ Environment: 🐍 Python 3.8+
 ## ORCID: 0009-0002-0645-5180
 
 ## Overview
-**UPDSF v6.7.0** is a mass-consistent, kinetically-consistent, provenance-tracked simulation framework testing whether **differential hydrolysis stability alone** can chemically filter **thymine (T) over uracil (U)** in dark, alkaline, high-temperature hydrothermal-vent conditions. The underlying v6.5.1 homopolymer engine (VSSUFEngine) is unchanged — all physics, kinetics, parameters, and existing output schemas are bit-identical at equal seeds. An opt-in **copolymer / Darwinian layer** adds sequence resolution and heredity.
+**UPDSF v6.7.0** is a mass-consistent, kinetically-consistent, provenance-tracked simulation framework testing whether **differential hydrolysis stability alone** can chemically filter **thymine (T) over uracil (U)** in dark, alkaline, high-temperature hydrothermal-vent conditions. The underlying v6.5.1 homopolymer engine (VSSUFEngine) is unchanged — all physics, kinetics, parameters, and existing output schemas are bit-identical at equal seeds. An opt-in **sequence-resolved copolymer / Darwinian layer** adds sequence resolution and heredity.
 
-# UPDSF v6.7.0 — Copolymer & Darwinian Extension
+---
 
-## Release Summary
-**UPDSF v6.7.0** is an opt-in extension to the UPDSF framework. The underlying **v6.5.1 homopolymer engine (VSSUFEngine)** is entirely unchanged: all physics, kinetics, parameters, and existing output schemas remain bit-identical to previous releases (equal seeds reproduce every v6.6.1 number exactly).
+## Requirements & Running
 
-The v6.7.0 release adds an **opt-in copolymer / Darwinian layer** that addresses two structural weaknesses of the homopolymer abstraction:
-1. **No sequence** — the homopolymer engine tracks nucleotide *counts* (e.g., 30,000 T + 18,000 U), but not their order.
-2. **No heredity** — the homopolymer engine tracks the *population* of polymers as a single statistical pool, with no mechanism for a specific polymer's success to depend on its own sequence.
+```bash
+pip install numpy pandas matplotlib
+python UPDSF_v6.7.0.py
+```
+
+A full run executes twelve self-checks, the temperature × pH grid (11 × 13 cells × 5 replicates), the seven-control decisive sweep (20 seeds), all robustness sweeps, the sequence-evolution sweep (5 variants × 10 seeds), and writes all JSON/CSV outputs and figures to `output_data_v670/`. Independent-seed sweeps are parallelized on 4 worker processes (`ProcessPoolExecutor`) and produce results bit-identical to serial execution. A full run is compute-heavy (tens of minutes to hours). On Windows the `if __name__ == "__main__":` guard must be kept.
 
 ## Architecture & Compatibility
-*   **Engine (Unchanged):** `VSSUFEngine` (v6.5.1). Handles all thermodynamic and kinetic calculations (hydrolysis, UV damage, drift, CSI decomposition, etc.).
-*   **Layer (New):** `CopolymerLayer` (v6.7.0). Wraps the engine, adding sequence-resolved polymer tracking and selection dynamics.
-*   **Schema Guarantee:** All existing `*.csv`, `*.json`, and dashboard plotting routines are unaffected. Legacy runs require no changes.
-*   **Opt-In:** The copolymer layer is activated via a single flag: `--enable-copolymer` (default: `false`).
 
-# What the Extension Adds
+*   **Engine (Unchanged):** `VSSUFEngine` (v6.5.1, Section 6). Handles all thermodynamic and kinetic calculations: Arrhenius hydrolysis (polymer, clay, lipid channels), free-monomer hydrolysis and deamination, two-state UV lesion model, CSI decomposition.
+*   **Layer (New, v6.7.0):** `SequenceEvolutionEngine` (Section 6c). Individuals are 100-residue sequences over {U, T, C, A, G} drawn from the feedstock influx ratios (INFLUX 45 T : 120 U residues/s). Viability uses the **same Arrhenius rates** as the homopolymer engine (k_U = 8.863×10⁻⁶/s, k_T = 2.483×10⁻⁸/s at 90 °C / pH 11, k_U/k_T ≈ 357×); a single residue hit is a chain scission and kills the individual.
+*   **Schema Guarantee:** All existing `*.csv`, `*.json`, and plotting routines are unaffected. At equal seeds, every v6.6.1 number is reproduced bit-identically.
+*   **Opt-In:** The sequence layer is opt-in by configuration, not a CLI flag: it is driven by `sequence_evolution_sweep()` (Section 6c), called in `main()` after the homopolymer sweeps, with a `config` dict (`generations`, `pop_size`, `seq_length`, `generation_hours`, `mutation_enabled`, `eq_mode`).
+
+## What the Extension Adds
 
 ### 1. Sequence Resolution
-The homopolymer abstraction treats all T-molecules as interchangeable and all U-molecules as interchangeable. The copolymer layer assigns each polymer a specific sequence of nucleotides (e.g., `T-U-T-T-U`). This allows the model to track:
-*   Local sequence features (e.g., runs of T vs. alternating T/U).
-*   Sequence-dependent hydrolysis and damage susceptibility (via a pluggable `SequenceEffect` interface).
-*   Sequence fingerprints in the output schemas (e.g., `sequence_string`, `GC_content`, etc.).
+The homopolymer abstraction treats all T-molecules (and all U-molecules) as interchangeable 100-residue single-base polymers. The sequence layer draws 100-residue copolymer individuals from the influx composition; each generation, every residue is destroyed independently (P(individual survives) = exp(−Σ_b n_b·k_b·τ)), so sequence composition — not order — determines survival, and every individual carries a full base composition.
 
 ### 2. Heredity & Darwinian Selection
-The homopolymer engine models population growth as a bulk rate (`net_population_growth`). The copolymer layer introduces **per-sequence differential survival and replication**:
-*   Each distinct sequence has its own fitness, derived from its chemical stability (from the engine) and its sequence-dependent growth rate.
-*   Successive generations inherit the parent sequence (with a configurable mutation rate, defaulting to 0 for deterministic runs).
-*   This creates a Darwinian selection loop: sequences that are more stable or replicate faster will dominate the population over time.
+Each generation (default 1 h, assumed):
+1.  **Viability** — per-residue Arrhenius hydrolysis; any chain scission kills the individual.
+2.  **Reproduction** — Wright–Fisher sampling of the next generation (default pop size N = 512) uniformly from survivors.
+3.  **Mutation** — template-directed copying with per-position misincorporation that depends on the **template** base (T template: 0.01, U template: 0.05 — G–U wobble makes U templates less faithful); errors substitute a uniformly random other base. Default `mutation_enabled=True`; the `no_mutation` sweep variant disables it for deterministic clonal-heredity control.
 
-### 3. New Output Schema (Copolymer Mode Only)
-When `--enable-copolymer` is set, the following additional outputs are generated:
-*   `sequence_table.csv`: Top-N most abundant sequences, their counts, and their derived fitness.
-*   `sequence_diversity.png`: A plot tracking sequence diversity over time.
-*   `fitness_landscape.png`: A heatmap of sequence fitness (if a sweep is run).
-*   `heredity_trace.json`: A detailed log of mutations, replication events, and lineage branching.
+### 3. New Output Schema (Sequence Layer)
+*   `output_data_v670/sequence_evolution_v670_<timestamp>.csv` — per-seed rows: `variant`, `seed`, `pop_TU_frac`, `seq_TU_over_influx`, `mean_copy_fidelity`, `mean_nU`/`mean_nT`, selection differential, `extinct`, `generations_run`, `pop_alive`.
+*   Derived metrics in the analysis JSON (under `sequence_evolution`): `darwinian_gain` (population T/(U+T) with replication ÷ chemistry-only survivor pool) and `control_corrected_seq_enrichment`.
+*   In-terminal per-variant aggregates (mean ± CI95, copy fidelity, extinction fraction).
+
+### Sweep Variants
+`sequence_evolution_sweep()` runs five variants (default 10 seeds each, base seed 20,000):
+| Variant | Replication | Mutation | Degradation |
+|---|---|---|---|
+| `baseline` | yes | yes | k_U/k_T ≈ 357× |
+| `equal_degradation` | yes | yes | k_U = k_T |
+| `chemistry_only` | no | — | k_U/k_T ≈ 357× |
+| `equal_degradation_chemistry_only` | no | — | k_U = k_T |
+| `no_mutation` | yes | no | k_U/k_T ≈ 357× |
+
+Four dedicated self-checks run at startup: sequence determinism, clonal heredity with mutation off, exact k_U == k_T under the equal-degradation control, and the filtering direction (baseline > equal_degradation at matched seeds).
 
 ## Intended Use Cases
-*   **Sequence-Dependent Chemistry:** Studying how the order of T and U affects the stability of the polymer, beyond bulk composition.
-*   **Darwinian Evolution of Polymers:** Modeling the emergence of a "fittest" sequence over long horizons (e.g., the 2400h runs), simulating the transition from a chemical pool to a genetic sequence.
-*   **Bridging the Gap:** Exploring how the homopolymer metrics (CSI, drift) map onto sequence-level outcomes (e.g., does a high CSI always correlate with a specific winning sequence?).
+*   **Sequence-Dependent Chemistry:** How sequence composition (U-rich vs T-rich individuals) affects survival beyond bulk pool statistics.
+*   **Darwinian Amplification:** Quantifying how much replication adds on top of the chemistry-built T-skew (`darwinian_gain`).
+*   **Robustness:** Mapping homopolymer metrics (CSI, drift) onto sequence-level outcomes at matched seeds.
 
-## Migration Guide from v6.6.1
-1.  **No changes required** for homopolymer runs. Simply upgrade the binary/package; all existing scripts and dashboards will function identically.
-2.  **To enable the new layer:** Add `--enable-copolymer` to your command-line arguments.
-3.  **New dependencies:** The copolymer layer requires `biopython` (for sequence handling) and `seaborn` (for the diversity plots).
-4.  **Dashboard compatibility:** The existing dashboards (e.g., *CSI trajectory*, *Decomposed controls*) remain valid. To visualize the new outputs, use the provided `plot_copolymer_dashboard.py` script.
+## Dependencies
+NumPy, pandas, matplotlib (Agg backend). No other packages required.
+
+---
 
 ## Key Result
-At the model optimum (**90 °C, in-situ pH 11, 240 h, zero photon flux**), differential hydrolysis (k_U/k_T ≈ 357) raises DNA T/(U+T) from **0.67× influx** under a no-selection control to **2.02× influx** in the baseline — a **control-corrected enrichment of ≈3.0×**. This figure is immune to assumed influx stoichiometry and CSI normalization convention, as both arms share every assumption.
+At the model optimum (**90 °C, in-situ pH 11, 240 h, zero photon flux**), differential hydrolysis (k_U/k_T ≈ 357, extrapolated) raises DNA T/(U+T) from **0.67× influx** under a no-selection control to **2.02× influx** in the baseline — a **control-corrected enrichment of ≈3.0×**. This figure is immune to assumed influx stoichiometry and CSI normalization convention, as both arms share every assumption.
 
-## Decisive Controls (7 arms × 20 seeds, pre-registered)
+## Decisive Controls (7 arms × 20 seeds)
 | Control arm | DNA T/(U+T) | CSI |
 |---|---|---|
 | baseline | 0.551 | 3.465 |
@@ -77,85 +87,28 @@ At the model optimum (**90 °C, in-situ pH 11, 240 h, zero photon flux**), diffe
 ### Verdict: REFUTED for the claim "free-pool hydrolysis drives the enrichment." Chemical filtering acts at **both monomer and polymer levels** (free-monomer channel dominant under assumed free-hydrolysis scale). Suppressing both channels eliminates enrichment (CSI 1.80; DNA T/(U+T) below feedstock).
 
 ## Darwinian Layer (v6.7.0, opt-in)
-100-residue copolymers, Wright–Fisher reproduction (N=512), template-dependent misincorporation. Replication **amplifies** the chemistry-built T-skew with a control-corrected gain of only **≈1.06×**. Without mutation, the population freezes as a clone (0.39 pop T/(U+T)); without replication, extinction in 10/10 seeds.
+100-residue copolymers, Wright–Fisher reproduction (N = 512, generation time 1 h, assumed), template-dependent misincorporation (0.01 T-template / 0.05 U-template per residue, assumed). Replication **amplifies** the chemistry-built T-skew with a control-corrected gain of only **≈1.06×**. Without mutation the population freezes as a clone; without replication, populations go extinct (extinction fraction reported per variant in the sequence CSV).
 
 ## Robustness
 - **Ea_T sweep (the "357× question"):** CSI 3.457–3.474 across Ea_T = 28–36 kcal/mol, even though k_U/k_T swings from 1,195× to 107×.
-- **Time-horizon sweep:** Enrichment still rising at 240 h (3.46×), 1,000 h (5.10×), 2,400 h (6.49×), 10,000 h (10.16×) as survival decays to 0.32. Horizon-edge optimum reported as lower bound.
-- **UV robustness:** No effect up to ~10¹⁵ photons cm⁻² s⁻¹; "UV selection" at extreme fluxes is differential sterilization, not compositional filtering.
-- **Influx-stoichiometry sweep:** Absolute CSI scales with feedstock T-fraction; control-corrected metric cancels this dependence.
+- **Time-horizon sweep:** Enrichment still rising at 240 h (3.46×), 1,000 h (5.10×), 2,400 h (6.49×), 10,000 h (10.16×). `optimum_is_horizon_edge` and `horizon_edge_warning` flag these optima; the horizon-edge optimum is reported as a lower bound.
+- **UV robustness:** No effect up to ~10¹⁵ photons cm⁻² s⁻¹; at extreme fluxes "UV selection" is differential sterilization, not compositional filtering (see `flux_sweep`: 6 fluxes × 3 quantum yields).
+- **Influx-stoichiometry sweep:** `influx_ratio_sweep` varies influx T (15–120 residues/s, U fixed at 120); absolute CSI scales with feedstock T-fraction, while the control-corrected metric cancels this dependence.
 
 ## Numerical Integrity
-All parameters carry explicit provenance (47 literature, 44 assumed, 15 imposed, 3 derived, 1 extrapolated). Mass balance closes to **max relative error 5.7 × 10⁻¹⁵** across a 572-cell sensitivity grid, with **exactly zero** consumed-identity residuals. Deterministic at fixed seeds; bit-identical serial vs. 4-worker parallel execution.
+Every parameter carries an explicit `Source` with `kind` ∈ {literature, assumed, imposed, derived, extrapolated}; the exact counts are printed at runtime (`PROVENANCE COUNTS`; Section 5) and every sweep result is reproducible at fixed seeds. Mass balance closes to machine precision (max relative error reported per run; the consumed-identity residual is asserted < 10⁻⁹ in `_self_check_mass_identity`), and serial vs 4-worker parallel execution is bit-identical by `_self_check_parallel`.
 
-# A Computational Theoretical Refutation of the RNA World Hypothesis
-
-**A brief based on UPDSF v6.7.0 — Chemical Filtering of Thymine over Uracil**
-
----
-
-## The RNA World Hypothesis (RWH)
-
-The RNA World Hypothesis posits that life began with a self-replicating RNA molecule. Its implicit sequence of events:
-
-1. A prebiotic pool contains activated ribonucleotides (A, **U**, G, C).
-2. These monomers polymerize into RNA oligomers.
-3. RNA replicates with errors, generating variation.
-4. Darwinian selection acts on replicating populations, and order emerges from chemistry.
-
-The RWH treats prebiotic chemistry as a **neutral stage** — a U-rich feedstock that is simply *available* — with selection emerging only at the level of replication.
-
----
 
 ## The v6.7.0 Finding
 
 Under dark, alkaline hydrothermal-vent conditions (90 °C, in-situ pH 11, zero photon flux), **differential hydrolysis stability alone** chemically filters T over U. The result is a control-corrected enrichment of **≈3.0×** — measured against an equal-degradation control that, with no differential chemistry, actively **depletes** T (0.67× influx).
 
-The filtering is **dual-channel**: it operates at both the **free-monomer** level (dominant, ≈68% of the enrichment gap) and the **polymer** level (≈49%), acting in series. The pre-registered single-channel hypothesis was **REFUTED**.
+The filtering is **dual-channel**: it operates at both the **free-monomer** level (dominant) and the **polymer** level, acting in series. The single-channel hypothesis was **REFUTED**.
 
-The opt-in Darwinian layer shows replication amplifies this chemistry-built skew by only **≈1.06×** (control-corrected). Without replication, populations go extinct in 10/10 seeds.
-
----
-
-## The Computational Theoretical Refutation, in Four Points
-
-**1. The RWH's feedstock cannot persist.**
-The RWH requires a U-rich pool. Under vent conditions the free pool drifts from 0.273 to **0.620 T/(U+T)** — a 2.27× enrichment of T over U — *before any polymerization occurs*. The environment the RWH depends on is actively destroying the U it needs.
-
-**2. The RWH assumes neutral chemistry. The chemistry is already a filter.**
-The RWH treats prebiotic chemistry as a passive backdrop. The v6.7.0 controls show the monomer-level filter dominates, and that polymer-level selection is secondary. Selection begins **before** replication — at the level of the molecule itself.
-
-**3. The RWH's central mechanism is only a marginal amplifier.**
-The RWH claims replication and selection **create** order. The data show they **preserve and weakly amplify** an order chemistry has already built (≈1.06×). Replication is necessary for persistence, but it is not the creator of the T-skew.
-
-**4. The RWH's implicit selection model is refuted.**
-The RWH implicitly assumes a single-channel, polymer-centric selection (T-DNA is more stable than U-RNA). The pre-registered control sweep **REFUTES** this. Both channels are required; neither alone suffices.
+The opt-in Darwinian layer shows replication amplifies this chemistry-built skew by only **≈1.06×** (control-corrected). Without replication, populations go extinct.
 
 ---
 
-## The Counter-Frame: The Matter World Hypothesis (MWH)
-
-The v6.7.0 computational theoretical results are consistent with — and support — the **Matter World Hypothesis**:
-
-- **Selection is a material property.** Differential stability is not a mechanism that *emerges* at the polymer level; it is a fundamental property of the molecules, operating wherever they exist (free pool, clay, lipid, polymer).
-- **The environment is the selector.** The vent does not *permit* RNA and then select among variants. It actively filters the monomer pool, enriching T and depleting U, before polymerization.
-- **Genetic machinery is a latecomer.** Replication, when it appears, is a marginal amplifier of a chemistry-built skew, not its creator.
-
-> **The RWH assumes chemistry is the stage and selection is the play.**
-> **The v6.7.0 framework shows chemistry is the playwright, and selection is a bit player.**
-
----
-
-## Conclusion
-
-The v6.7.0 framework constitutes a **theoretical refutation of the RNA World Hypothesis**:
-
-- The RWH requires a U-rich feedstock that the MWH-consistent chemistry preferentially destroys.
-- The RWH assumes neutral chemistry that is, in fact, already selective.
-- The RWH requires Darwinian selection to create order, but the data show it only amplifies a pre-existing chemical order.
-- The RWH's implicit single-channel selection model is pre-registered and **REFUTED**.
-
-**Chemistry precedes and constrains the Genetic World.** The path to T-rich DNA does not run through a U-rich RNA world; it runs through a dark, alkaline vent that filters matter before any gene exists.
 
 ---
 

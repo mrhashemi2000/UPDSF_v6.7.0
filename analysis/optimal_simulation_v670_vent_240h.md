@@ -1,3 +1,10 @@
+EXTENSION RELEASE. The v6.5.1 homopolymer engine (VSSUFEngine) is
+UNCHANGED: physics, kinetics, parameters, and all existing output
+schemas are identical, and at equal seeds every v6.6.1 number is
+reproduced bit-identically. v6.7.0 adds an OPT-IN copolymer /
+Darwinian layer that addresses the two structural weaknesses of the
+homopolymer abstraction (no sequence, no heredity):
+
 <img width="4500" height="3656" alt="optimal_simulation_v670_vent_240h" src="https://github.com/user-attachments/assets/45bfcd98-0763-4fe4-99a1-56064244be13" />
 
 ### **Overview**

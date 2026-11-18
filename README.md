@@ -88,6 +88,77 @@ At the model optimum (**90 °C, in-situ pH 11, 240 h, zero photon flux**), diffe
 ## Numerical Integrity
 All parameters carry explicit provenance (47 literature, 44 assumed, 15 imposed, 3 derived, 1 extrapolated). Mass balance closes to **max relative error 5.7 × 10⁻¹⁵** across a 572-cell sensitivity grid, with **exactly zero** consumed-identity residuals. Deterministic at fixed seeds; bit-identical serial vs. 4-worker parallel execution.
 
+# A Computational Theoretical Refutation of the RNA World Hypothesis
+
+**A brief based on UPDSF v6.7.0 — Chemical Filtering of Thymine over Uracil**
+
+---
+
+## The RNA World Hypothesis (RWH)
+
+The RNA World Hypothesis posits that life began with a self-replicating RNA molecule. Its implicit sequence of events:
+
+1. A prebiotic pool contains activated ribonucleotides (A, **U**, G, C).
+2. These monomers polymerize into RNA oligomers.
+3. RNA replicates with errors, generating variation.
+4. Darwinian selection acts on replicating populations, and order emerges from chemistry.
+
+The RWH treats prebiotic chemistry as a **neutral stage** — a U-rich feedstock that is simply *available* — with selection emerging only at the level of replication.
+
+---
+
+## The v6.7.0 Finding
+
+Under dark, alkaline hydrothermal-vent conditions (90 °C, in-situ pH 11, zero photon flux), **differential hydrolysis stability alone** chemically filters T over U. The result is a control-corrected enrichment of **≈3.0×** — measured against an equal-degradation control that, with no differential chemistry, actively **depletes** T (0.67× influx).
+
+The filtering is **dual-channel**: it operates at both the **free-monomer** level (dominant, ≈68% of the enrichment gap) and the **polymer** level (≈49%), acting in series. The pre-registered single-channel hypothesis was **REFUTED**.
+
+The opt-in Darwinian layer shows replication amplifies this chemistry-built skew by only **≈1.06×** (control-corrected). Without replication, populations go extinct in 10/10 seeds.
+
+---
+
+## The Computational Theoretical Refutation, in Four Points
+
+**1. The RWH's feedstock cannot persist.**
+The RWH requires a U-rich pool. Under vent conditions the free pool drifts from 0.273 to **0.620 T/(U+T)** — a 2.27× enrichment of T over U — *before any polymerization occurs*. The environment the RWH depends on is actively destroying the U it needs.
+
+**2. The RWH assumes neutral chemistry. The chemistry is already a filter.**
+The RWH treats prebiotic chemistry as a passive backdrop. The v6.7.0 controls show the monomer-level filter dominates, and that polymer-level selection is secondary. Selection begins **before** replication — at the level of the molecule itself.
+
+**3. The RWH's central mechanism is only a marginal amplifier.**
+The RWH claims replication and selection **create** order. The data show they **preserve and weakly amplify** an order chemistry has already built (≈1.06×). Replication is necessary for persistence, but it is not the creator of the T-skew.
+
+**4. The RWH's implicit selection model is refuted.**
+The RWH implicitly assumes a single-channel, polymer-centric selection (T-DNA is more stable than U-RNA). The pre-registered control sweep **REFUTES** this. Both channels are required; neither alone suffices.
+
+---
+
+## The Counter-Frame: The Matter World Hypothesis (MWH)
+
+The v6.7.0 computational theoretical results are consistent with — and support — the **Matter World Hypothesis**:
+
+- **Selection is a material property.** Differential stability is not a mechanism that *emerges* at the polymer level; it is a fundamental property of the molecules, operating wherever they exist (free pool, clay, lipid, polymer).
+- **The environment is the selector.** The vent does not *permit* RNA and then select among variants. It actively filters the monomer pool, enriching T and depleting U, before polymerization.
+- **Genetic machinery is a latecomer.** Replication, when it appears, is a marginal amplifier of a chemistry-built skew, not its creator.
+
+> **The RWH assumes chemistry is the stage and selection is the play.**
+> **The v6.7.0 framework shows chemistry is the playwright, and selection is a bit player.**
+
+---
+
+## Conclusion
+
+The v6.7.0 framework constitutes a **theoretical refutation of the RNA World Hypothesis**:
+
+- The RWH requires a U-rich feedstock that the MWH-consistent chemistry preferentially destroys.
+- The RWH assumes neutral chemistry that is, in fact, already selective.
+- The RWH requires Darwinian selection to create order, but the data show it only amplifies a pre-existing chemical order.
+- The RWH's implicit single-channel selection model is pre-registered and **REFUTED**.
+
+**Chemistry precedes and constrains the Genetic World.** The path to T-rich DNA does not run through a U-rich RNA world; it runs through a dark, alkaline vent that filters matter before any gene exists.
+
+---
+
 ## Citation
 
 Reza Hashemi. (2026). Chemical Filtering of Thymine over Uracil by Differential Hydrolysis under Dark Alkaline Hydrothermal-Vent Conditions: A Mass-Consistent, Control-Restrained Simulation Framework (UPDSF v6.7.0). Zenodo. https://doi.org/10.5281/zenodo.24331292

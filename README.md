@@ -16,14 +16,17 @@ Environment: 🐍 Python 3.8+
 
 ---
 
-## Requirements & Running
 
-```bash
-pip install numpy pandas matplotlib
-python UPDSF_v6.7.0.py
-```
 
-A full run executes twelve self-checks, the temperature × pH grid (11 × 13 cells × 5 replicates), the seven-control decisive sweep (20 seeds), all robustness sweeps, the sequence-evolution sweep (5 variants × 10 seeds), and writes all JSON/CSV outputs and figures to `output_data_v670/`. Independent-seed sweeps are parallelized on 4 worker processes (`ProcessPoolExecutor`) and produce results bit-identical to serial execution. A full run is compute-heavy (tens of minutes to hours). On Windows the `if __name__ == "__main__":` guard must be kept.
+<br>
+<br>
+
+📂 **Critique: Robustness of the CSI to Uncertainty in the Uracil-to-Thymine Hydrolysis Rate Ratio**
+
+The detailed Critique: Robustness of the CSI to Uncertainty in the Uracil-to-Thymine Hydrolysis Rate Ratio can be found in the 📄 [Robustness of the CSI to Uncertainty in the Uracil-to-Thymine Hydrolysis Rate Ratio](analysis/Robustness_of_the_CSI_to\-Uncertainty.md)
+
+<br>
+<br>
 
 ## Architecture & Compatibility
 

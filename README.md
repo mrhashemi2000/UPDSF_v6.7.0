@@ -21,7 +21,8 @@ Environment: 🐍 Python 3.8+
 
 📂 **Critique: Robustness of the CSI to Uncertainty in the Uracil-to-Thymine Hydrolysis Rate Ratio**
 
-The detailed Critique: Robustness of the CSI to Uncertainty in the Uracil-to-Thymine Hydrolysis Rate Ratio can be found in the 📄 [Robustness of the CSI to Uncertainty in the Uracil-to-Thymine Hydrolysis Rate Ratio](analysis/Robustness_of_the_CSI_to\-Uncertainty.md)
+The detailed Critique: Robustness of the CSI to Uncertainty in the Uracil-to-Thymine Hydrolysis Rate Ratio can be found in the 📄 [Robustness of the CSI to Uncertainty in the Uracil-to-Thymine Hydrolysis Rate Ratio](analysis
+/Robustness_of_the_CSI_to_Uncertainty.md)
 
 <br>
 <br>

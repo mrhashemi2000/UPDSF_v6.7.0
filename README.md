@@ -1,3 +1,4 @@
+[![DOI](https://img.shields.io/badge/DOI-10.26434/chemrxiv.15012436/v1-green)]([https://doi.org/10.26434/chemrxiv.15011902/v1](https://doi.org/10.26434/chemrxiv.15012436/v1)) [![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 
 [![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.24328241-blue)](https://doi.org/10.5281/zenodo.24328241) [![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 

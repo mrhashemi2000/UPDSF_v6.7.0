@@ -116,6 +116,8 @@ The opt-in Darwinian layer shows replication amplifies this chemistry-built skew
 
 ## Citation
 
+Reza Hashemi. (2026). Chemical Filtering of Thymine over Uracil by Differential Hydrolysis under Dark Alkaline Hydrothermal-Vent Conditions: A Mass-Consistent, Control-Restrained Simulation Framework (UPDSF v6.7.0). chemrxiv. https://doi.org/10.26434/chemrxiv.15012436/v1
+
 Reza Hashemi. (2026). Chemical Filtering of Thymine over Uracil by Differential Hydrolysis under Dark Alkaline Hydrothermal-Vent Conditions: A Mass-Consistent, Control-Restrained Simulation Framework (UPDSF v6.7.0). Zenodo. https://doi.org/10.5281/zenodo.24331292
 
 Reza Hashemi. (2026). mrhashemi2000/UPDSF_v6.7.0: Initial release [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.24328241
